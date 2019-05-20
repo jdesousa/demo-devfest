@@ -7,8 +7,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -26,8 +29,13 @@ public class TvShowController {
 		return tvShowService.saveAll();
 	}
 
-	@GetMapping(value = "/tvShowWithRaing", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+	@GetMapping(value = "/tvShowWithRating", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
 	public Flux<TvShowWithRating> getTvShowWithRating() {
 		return tvShowService.getTvShowsWithRating();
+	}
+
+	@GetMapping(value = "/tvShowWithRatingByIds", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public Flux<TvShowWithRating> getTvShowWithRatingById(@RequestParam("ids")List<String> ids) {
+		return tvShowService.getTvShowsWithRatingByIds(ids);
 	}
 }

@@ -1,6 +1,8 @@
 package fr.leroymerlin.demodevfest.service;
 
+import fr.leroymerlin.demodevfest.client.TvShowRatingClient;
 import fr.leroymerlin.demodevfest.model.TvShow;
+import fr.leroymerlin.demodevfest.model.TvShowIds;
 import fr.leroymerlin.demodevfest.model.TvShowRating;
 import fr.leroymerlin.demodevfest.model.TvShowWithRating;
 import fr.leroymerlin.demodevfest.repository.TvShowRepository;
@@ -26,6 +28,7 @@ import static java.util.function.Function.identity;
 public class TvShowService {
 	private TvShowRepository tvShowRepository;
 	private TvShowRatingService tvShowRatingService;
+	private TvShowRatingClient tvShowRatingClient;
 
 	public Mono<TvShow> findById(String id) {
 		return tvShowRepository.findById(id);
@@ -54,10 +57,19 @@ public class TvShowService {
 		return tvShowRepository.findAll()
 							   .limitRate(1000)
 							   .buffer(500)
-							   .doOnEach(listSignal -> log.info("buffer 100 tv shows"))
-							   .flatMap(tvShows -> tvShowRatingService.findByIds(extractIdsFromTvShows(tvShows))
-																	  .collectList()
-																	  .flatMapMany(tvShowRatings -> createTvShowWithRating(tvShows, tvShowRatings)));
+							   .flatMap(tvShows -> tvShowRatingClient.findTvshowRatingByIds(extractIdsFromTvShows(tvShows))
+																	 .collectList()
+																	 .flatMapMany(tvShowRatings -> createTvShowWithRating(tvShows, tvShowRatings)),
+								   50);
+	}
+
+	public Flux<TvShowWithRating> getTvShowsWithRatingByIds(List<String> ids) {
+		return tvShowRepository.findAllById(ids)
+							   .collectList()
+							   .flatMapMany(tvShows -> tvShowRatingClient.findTvshowRatingByIds(extractIdsFromTvShows(tvShows))
+																		 .collectList()
+																		 .flatMapMany(tvShowRating -> createTvShowWithRating(tvShows,
+																			 tvShowRating)));
 	}
 
 	private Flux<TvShowWithRating> createTvShowWithRating(List<TvShow> tvShows, List<TvShowRating> tvShowRatings) {
@@ -72,9 +84,12 @@ public class TvShowService {
 
 	}
 
-	private List<String> extractIdsFromTvShows(List<TvShow> tvShows) {
-		return tvShows.stream()
-					  .map(TvShow::getId)
-					  .collect(Collectors.toList());
+	private TvShowIds extractIdsFromTvShows(List<TvShow> tvShows) {
+		return TvShowIds.builder()
+						.ids(tvShows.stream()
+									.map(TvShow::getId)
+									.collect(Collectors.toList()))
+						.build();
+
 	}
 }

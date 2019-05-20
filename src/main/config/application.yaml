@@ -65,4 +65,8 @@ spring:
       uri: mongodb+srv://eko:ler123EkoLm@eko-iacmn.gcp.mongodb.net/test?retryWrites=true
 
 
+tv-show-rating-api:
+  baseUrl: http://localhost:8080
+  readTimeout: 15000
+
 
