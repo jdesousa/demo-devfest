@@ -1,0 +1,4 @@
+spring.cloud.config.uri: http://config-server.qa.apps.op.acp.adeo.com
+
+# If the config server is not up, the application will cache to prevent default conf loading
+spring.cloud.config.fail-fast: false

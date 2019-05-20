@@ -1,0 +1,22 @@
+= Data Integration Product Core
+
+== Properties:
+
+__Firebase__
+```
+api.firebase.host
+api.firebase.key
+api.firebase.lastupdate.url
+```
+__Yucca__
+```
+api.product.updated.url
+api.product.init.url
+api.product.host
+api.product.key
+```
+
+__Scheduler__
+```
+scheduler.enable
+```
