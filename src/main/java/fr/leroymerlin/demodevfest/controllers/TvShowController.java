@@ -1,15 +1,17 @@
 package fr.leroymerlin.demodevfest.controllers;
 
 import fr.leroymerlin.demodevfest.model.TvShow;
-import fr.leroymerlin.demodevfest.model.TvShowWithRating;
 import fr.leroymerlin.demodevfest.service.TvShowService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -29,13 +31,17 @@ public class TvShowController {
 		return tvShowService.saveAll();
 	}
 
-	@GetMapping(value = "/tvShowWithRating", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-	public Flux<TvShowWithRating> getTvShowWithRating() {
-		return tvShowService.getTvShowsWithRating();
+	@GetMapping(value = "/tvShows", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+	public Flux<TvShow> getTvShows(@RequestParam(value = "ids", required = false) List<String> ids) {
+		if (!CollectionUtils.isEmpty(ids)) {
+			return tvShowService.getTvShowsWithRatingByIds(ids);
+		} else {
+			return tvShowService.getTvShowsWithRating();
+		}
 	}
 
-	@GetMapping(value = "/tvShowWithRatingByIds", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public Flux<TvShowWithRating> getTvShowWithRatingById(@RequestParam("ids")List<String> ids) {
-		return tvShowService.getTvShowsWithRatingByIds(ids);
+	@GetMapping(value = "/tvShows/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public Mono<TvShow> getTvShowById(@PathVariable String id) {
+		return tvShowService.findById(id);
 	}
 }

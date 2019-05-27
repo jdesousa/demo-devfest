@@ -30,10 +30,6 @@ public class TvShowRatingClient {
 						.retrieve()
 						.bodyToFlux(TvShowRating.class)
 						.doOnSubscribe(subscription -> s.start())
-						.doOnTerminate(() -> {
-							s.stop();
-							log.info("load rating in {}", s.getTime(TimeUnit.MILLISECONDS));
-						})
 						.doOnError(throwable -> {
 							s.stop();
 							log.error("Error when call Rating api in {}", s.getTime(TimeUnit.MILLISECONDS), throwable);

@@ -9,8 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -31,5 +34,10 @@ public class TvShowRatingController {
 	@PostMapping(value = "/tvShowRatingByIds", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public Flux<TvShowRating> getByIds(@RequestBody TvShowIds tvShowIds) {
 		return tvShowRatingService.findByIds(tvShowIds.getIds());
+	}
+
+	@GetMapping(value = "/tvShowRatingByIds", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public Flux<TvShowRating> getByIds(@RequestParam("ids") List<String> ids) {
+		return tvShowRatingService.findByIds(ids);
 	}
 }

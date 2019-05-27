@@ -35,8 +35,7 @@ public class TvShowRatingService {
 	}
 
 	public Flux<TvShowRating> getAll() {
-		return tvShowRatingRepository.findAll()
-									 .limitRate(1000);
+		return tvShowRatingRepository.findAll();
 	}
 
 	public Flux<TvShowRating> findByIds(List<String> tvShowIds) {
