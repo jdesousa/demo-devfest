@@ -2,38 +2,50 @@ package fr.leroymerlin.demodevfest.client;
 
 import fr.leroymerlin.demodevfest.model.TvShowIds;
 import fr.leroymerlin.demodevfest.model.TvShowRating;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.StopWatch;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.retry.Retry;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class TvShowRatingClient {
-	private static String RATING_PATH = "/tvShowRatingByIds";
+	private static String RATING_PATH = "/tvShowRatingByIds?ids={ids}";
 	private WebClient webClient;
 
-	public Flux<TvShowRating> findTvshowRatingByIds(TvShowIds tvShowIds) {
-		StopWatch s = new StopWatch();
+	@Value("${tv-show-rating-api.retry-max:3}")
+	private Integer retryMax;
+	@Value("${tv-show-rating-api.retry-first-backoff:500}")
+	private Integer retryFirstBackOff;
+	@Value("${tv-show-rating-api.retry-max-backoff:5000}")
+	private Integer retryMaxBackOff;
 
-		return webClient.post()
-						.uri(RATING_PATH)
+	public TvShowRatingClient(WebClient webClient) {
+		this.webClient = webClient;
+	}
+
+	public Flux<TvShowRating> findTvshowRatingByIds(TvShowIds tvShowIds) {
+
+		return webClient.get()
+						.uri(RATING_PATH, String.join(",", tvShowIds.getIds()))
 						.accept(MediaType.APPLICATION_JSON_UTF8)
-						.body(BodyInserters.fromObject(tvShowIds))
 						.retrieve()
 						.bodyToFlux(TvShowRating.class)
-						.doOnSubscribe(subscription -> s.start())
+						.retryWhen(manageRetry())
 						.doOnError(throwable -> {
-							s.stop();
-							log.error("Error when call Rating api in {}", s.getTime(TimeUnit.MILLISECONDS), throwable);
+							log.error("Error when call Rating api", throwable);
 						});
 	}
 
+	private Retry<Object> manageRetry() {
+		return Retry.any()
+					.exponentialBackoffWithJitter(Duration.ofMillis(retryFirstBackOff), Duration.ofMillis(retryMaxBackOff))
+					.retryMax(retryMax)
+					.doOnRetry(objectRetryContext -> log.info("Error occurred, retrying (attempts {}).", objectRetryContext.iteration()));
+	}
 }

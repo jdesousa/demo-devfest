@@ -34,9 +34,9 @@ public class TvShowController {
 	@GetMapping(value = "/tvShows", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
 	public Flux<TvShow> getTvShows(@RequestParam(value = "ids", required = false) List<String> ids) {
 		if (!CollectionUtils.isEmpty(ids)) {
-			return tvShowService.getTvShowsWithRatingByIds(ids);
+			return tvShowService.findByIds(ids);
 		} else {
-			return tvShowService.getTvShowsWithRating();
+			return tvShowService.findAll();
 		}
 	}
 

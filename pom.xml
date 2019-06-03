@@ -33,13 +33,6 @@
         <maven.test.failure.ignore>false</maven.test.failure.ignore>
     </properties>
 
-<!--    <scm>-->
-<!--        <url>http://gitlab-xnet.fr.corp.leroymerlin.com/10114660/lmfr-core-product-integration.git</url>-->
-<!--        <connection>scm:git:http://gitlab-xnet.fr.corp.leroymerlin.com/10114660/lmfr-core-product-integration.git</connection>-->
-<!--        <developerConnection>scm:git:http://gitlab-xnet.fr.corp.leroymerlin.com/10114660/lmfr-core-product-integration.git</developerConnection>-->
-<!--        <tag>HEAD</tag>-->
-<!--    </scm>-->
-
     <dependencyManagement>
         <dependencies>
             <!-- Spring Boot -->
@@ -120,6 +113,11 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.projectreactor.addons</groupId>
+            <artifactId>reactor-extra</artifactId>
+        </dependency>
+
         <!-- Spring Micrometers -->
         <dependency>
             <groupId>io.micrometer</groupId>
@@ -161,6 +159,38 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- JUnit mocking and matchers -->
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.23.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>2.23.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- mockserver -->
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>5.5.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-client-java</artifactId>
+            <version>5.5.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <version>3.2.6.RELEASE</version>
             <scope>test</scope>
         </dependency>
 
@@ -329,4 +359,5 @@
                 </excludes>
             </resource>
         </resources>
-    </build></project>
+    </build>
+</project>

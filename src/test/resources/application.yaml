@@ -1,0 +1,14 @@
+# Common
+spring.application.name: lmfr-demo-devfest-test
+
+# Mongo
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://eko:ler123EkoLm@eko-iacmn.gcp.mongodb.net/test?retryWrites=true
+
+tv-show-rating-api:
+  baseUrl: http://localhost:1080
+  retry-max: 3
+  retry-first-backoff: 1
+  retry-max-backoff: 1

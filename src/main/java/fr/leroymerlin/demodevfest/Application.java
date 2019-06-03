@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.convert.ConfigurableTypeInformationMapper;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -29,10 +28,8 @@ public class Application {
 	 * @param args
 	 * 		startup arguments.
 	 *
-	 * @throws IOException
-	 * 		IOException
 	 */
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
 
