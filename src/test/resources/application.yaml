@@ -1,6 +1,8 @@
 # Common
 spring.application.name: lmfr-demo-devfest-test
 
+management.endpoints.enabled-by-default: false
+
 # Mongo
 spring:
   data:
