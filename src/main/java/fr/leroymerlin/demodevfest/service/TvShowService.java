@@ -9,14 +9,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.GroupedFlux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static java.util.Arrays.asList;
-import static java.util.function.Function.identity;
 
 @Service
 @AllArgsConstructor
@@ -27,44 +25,48 @@ public class TvShowService {
 	private CsvFileReader csvFileReader;
 
 	public Mono<TvShow> findById(String id) {
-		return tvShowRepository
-				   .findById(id)
-				   .flatMap(tvShow -> tvShowRatingClient.findTvshowRatingByIds(TvShowIds.builder()
-																						.ids(asList(id))
-																						.build())
-														.collectList()
-														.map(tvShowRating -> addRatingInformation(tvShow, tvShowRating.get(0))));
+		return tvShowRepository.findById(id)
+							   .flatMap(tvShow -> tvShowRatingClient.findTvshowRatingById(id)
+																	.map(tvShowRating -> addRatingInformation(tvShow, tvShowRating))
+																	.switchIfEmpty(Mono.just(tvShow)));
+	}
+
+	public Mono<TvShow> findByIdParallel(String id) {
+		return Mono.zip(tvShowRepository.findById(id), tvShowRatingClient.findTvshowRatingById(id)
+																		 .defaultIfEmpty(TvShowRating.NO_TV_SHOW_RATING))
+				   .map(tvShowAndRating -> addRatingInformation(tvShowAndRating.getT1(), tvShowAndRating.getT2()));
 	}
 
 	public Flux<TvShow> findAll() {
 		return tvShowRepository.findAll()
 							   .buffer(100)
-							   .flatMap(tvShows -> tvShowRatingClient.findTvshowRatingByIds(extractIdsFromTvShows(tvShows))
-																	 .collectList()
-																	 .flatMapMany(tvShowRatings -> createTvShowWithRating(tvShows, tvShowRatings)));
+							   .flatMap(this::fetchRating);
+	}
+
+	private Flux<TvShow> fetchRating(List<TvShow> tvShows) {
+		return tvShowRatingClient.findTvshowRatingByIds(extractIdsFromTvShows(tvShows))
+								 .groupBy(TvShowRating::getTvShowId)
+								 .flatMap(ratingByTvShow -> addTvShowRating(tvShows, ratingByTvShow));
+	}
+
+	private Flux<TvShow> addTvShowRating(List<TvShow> tvShows, GroupedFlux<String, TvShowRating> ratingByTvShow) {
+		Map<String, TvShow> tvShowById = tvShows.stream()
+												.collect(Collectors.toMap(TvShow::getId, tvShow -> tvShow));
+
+		return ratingByTvShow.map(tvShowRating -> addRatingInformation(tvShowById.get(ratingByTvShow.key()), tvShowRating));
 	}
 
 	public Flux<TvShow> saveAll() {
 		return csvFileReader.readTvShow()
 							.buffer(100)
-							.flatMap(tvShows -> tvShowRepository.saveAll(tvShows), 5, 100);
+							.flatMapSequential(tvShows -> tvShowRepository.saveAll(tvShows), 5, 100);
 	}
 
 	public Flux<TvShow> findByIds(List<String> ids) {
 		return tvShowRepository
 				   .findAllById(ids)
 				   .collectList()
-				   .flatMapMany(tvShows -> tvShowRatingClient.findTvshowRatingByIds(extractIdsFromTvShows(tvShows))
-															 .collectList()
-															 .flatMapMany(tvShowRating -> createTvShowWithRating(tvShows, tvShowRating)));
-	}
-
-	private Flux<TvShow> createTvShowWithRating(List<TvShow> tvShows, List<TvShowRating> tvShowRatings) {
-		Map<String, TvShowRating> tvshowRatingsByTvShowId = tvShowRatings.stream()
-																		 .collect(Collectors.toMap(TvShowRating::getTvShowId, identity()));
-
-		return Flux.fromIterable(tvShows)
-				   .map(tvShow -> addRatingInformation(tvShow, tvshowRatingsByTvShowId.get(tvShow.getId())));
+				   .flatMapMany(this::fetchRating);
 	}
 
 	private TvShow addRatingInformation(TvShow tvShow, TvShowRating tvShowRating) {

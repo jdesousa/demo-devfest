@@ -19,7 +19,7 @@ public class Application {
 
 	static {
 		// Enable Netty Http Server access log
-		System.setProperty("reactor.netty.http.server.accessLogEnabled", "true");
+		System.setProperty("reactor.netty.http.server.accessLogEnabled", "false");
 	}
 
 	/**

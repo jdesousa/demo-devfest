@@ -6,12 +6,14 @@ import fr.leroymerlin.demodevfest.service.TvShowRatingService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -39,5 +41,10 @@ public class TvShowRatingController {
 	@GetMapping(value = "/tvShowRatingByIds", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public Flux<TvShowRating> getByIds(@RequestParam("ids") List<String> ids) {
 		return tvShowRatingService.findByIds(ids);
+	}
+
+	@GetMapping(value = "/tvShowRating/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public Mono<TvShowRating> getByIds(@PathVariable("id") String id) {
+		return tvShowRatingService.findById(id);
 	}
 }
