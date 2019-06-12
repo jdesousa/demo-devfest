@@ -41,9 +41,7 @@ public class TvShowRatingClient {
 						.retrieve()
 						.bodyToFlux(TvShowRating.class)
 						.retryWhen(manageRetry())
-						.doOnError(throwable -> {
-							log.error("Error when call Rating api", throwable);
-						});
+						.doOnError(throwable -> log.error("Error when call Rating api", throwable));
 	}
 
 	public Mono<TvShowRating> findTvshowRatingById(String id) {
@@ -53,9 +51,7 @@ public class TvShowRatingClient {
 						.retrieve()
 						.bodyToMono(TvShowRating.class)
 						.retryWhen(manageRetry())
-						.doOnError(throwable -> {
-							log.error("Error when call Rating api", throwable);
-						});
+						.doOnError(throwable -> log.error("Error when call Rating api", throwable));
 	}
 
 	private Retry<Object> manageRetry() {
