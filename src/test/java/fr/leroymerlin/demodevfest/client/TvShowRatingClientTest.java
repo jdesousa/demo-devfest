@@ -1,6 +1,7 @@
 package fr.leroymerlin.demodevfest.client;
 
 import com.google.common.net.MediaType;
+import fr.leroymerlin.demodevfest.IntegrationTestConfiguration;
 import fr.leroymerlin.demodevfest.model.TvShowIds;
 import fr.leroymerlin.demodevfest.model.TvShowRating;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.mockserver.matchers.Times;
 import org.mockserver.model.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -19,6 +22,8 @@ import static java.util.Arrays.asList;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+@SpringBootTest(classes = IntegrationTestConfiguration.class)
+@ActiveProfiles("client")
 class TvShowRatingClientTest extends AbstractClientIntegrationTest {
 
 	@Autowired

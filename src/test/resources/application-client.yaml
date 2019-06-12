@@ -7,7 +7,7 @@ management.endpoints.enabled-by-default: false
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://eko:ler123EkoLm@eko-iacmn.gcp.mongodb.net/test?retryWrites=true
+      uri: mongodb://localhost:27017/test
 
 tv-show-rating-api:
   baseUrl: http://localhost:1080

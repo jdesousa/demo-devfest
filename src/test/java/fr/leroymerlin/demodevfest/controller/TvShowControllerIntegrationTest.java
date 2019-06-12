@@ -6,9 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(classes = IntegrationTestConfiguration.class)
+@ActiveProfiles("integration")
+//@PropertySource("classpath:application-test.yaml")
 @AutoConfigureWebTestClient
 class TvShowControllerIntegrationTest  {
 
@@ -27,8 +30,7 @@ class TvShowControllerIntegrationTest  {
 					 .expectBody()
 					 .jsonPath(".id").isEqualTo("tt0041002")
 					 .jsonPath(".title").isEqualTo("Arthur Godfrey and His Friends")
-					 .jsonPath(".averageRating").isEqualTo(7.5)
-					 .jsonPath(".numVotes").isEqualTo(13);
+					 .jsonPath(".averageRating").isEqualTo(6.3)
+					 .jsonPath(".numVotes").isEqualTo(18);
 	}
-
 }

@@ -1,0 +1,16 @@
+# Common
+spring.application.name: lmfr-demo-devfest-test
+
+management.endpoints.enabled-by-default: false
+
+# Mongo
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/test
+
+tv-show-rating-api:
+  baseUrl: http://localhost:7070
+  retry-max: 3
+  retry-first-backoff: 1
+  retry-max-backoff: 1

@@ -1,5 +1,6 @@
 package fr.leroymerlin.demodevfest.service;
 
+import com.mongodb.MongoTimeoutException;
 import fr.leroymerlin.demodevfest.client.TvShowRatingClient;
 import fr.leroymerlin.demodevfest.model.TvShow;
 import fr.leroymerlin.demodevfest.model.TvShowIds;
@@ -59,6 +60,13 @@ class TvShowServiceTest {
 										   .numVotes(12)
 										   .averageRating(34.5f)
 										   .build();
+
+		TvShowRating rating2 = TvShowRating.builder()
+										   .tvShowId("2")
+										   .numVotes(0)
+										   .averageRating(0f)
+										   .build();
+
 		TvShowRating rating3 = TvShowRating.builder()
 										   .tvShowId("3")
 										   .numVotes(64)
@@ -71,20 +79,32 @@ class TvShowServiceTest {
 
 		when(tvShowRepository.findAll()).thenReturn(Flux.just(tvShow1, tvShow2, tvShow3));
 
-		when(tvShowRatingClient.findTvshowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating3));
+		when(tvShowRatingClient.findTvshowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating2, rating3));
 
 		Flux<TvShow> result = cut.findAll();
 
 		StepVerifier.create(result)
 					.expectNext(tvShow1.withNumVotes(rating1.getNumVotes())
 									   .withAverageRating(rating1.getAverageRating()))
-					.expectNext(tvShow2)
+					.expectNext(tvShow2.withNumVotes(rating2.getNumVotes())
+									   .withAverageRating(rating2.getAverageRating()))
 					.expectNext(tvShow3.withNumVotes(rating3.getNumVotes())
 									   .withAverageRating(rating3.getAverageRating()))
 					.verifyComplete();
 
 		verify(tvShowRepository).findAll();
 		verify(tvShowRatingClient).findTvshowRatingByIds(ratingParams);
+	}
+
+	@Test
+	@DisplayName("When finding all tv shows with a mongo repository, then return a flux error")
+	void findAllWithMongoError() {
+		when(tvShowRepository.findAll()).thenReturn(Flux.error(new MongoTimeoutException("error")));
+
+		Flux<TvShow> result = cut.findAll();
+
+		StepVerifier.create(result)
+					.verifyError(MongoTimeoutException.class);
 	}
 
 	@Test
@@ -97,10 +117,6 @@ class TvShowServiceTest {
 							   .title("az")
 							   .build();
 
-		TvShowIds ratingParams = TvShowIds.builder()
-										  .ids(asList("1"))
-										  .build();
-
 		TvShowRating rating1 = TvShowRating.builder()
 										   .tvShowId("1")
 										   .numVotes(12)
@@ -109,7 +125,7 @@ class TvShowServiceTest {
 
 		when(tvShowRepository.findById(idToFind)).thenReturn(Mono.just(tvShow1));
 
-		when(tvShowRatingClient.findTvshowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1));
+		when(tvShowRatingClient.findTvshowRatingById(tvShow1.getId())).thenReturn(Mono.just(rating1));
 
 		Mono<TvShow> result = cut.findById(idToFind);
 
@@ -119,7 +135,7 @@ class TvShowServiceTest {
 					.verifyComplete();
 
 		verify(tvShowRepository).findById(idToFind);
-		verify(tvShowRatingClient).findTvshowRatingByIds(ratingParams);
+		verify(tvShowRatingClient).findTvshowRatingById(tvShow1.getId());
 	}
 
 	@Test
@@ -144,6 +160,13 @@ class TvShowServiceTest {
 										   .numVotes(12)
 										   .averageRating(34.5f)
 										   .build();
+
+		TvShowRating rating2 = TvShowRating.builder()
+										   .tvShowId("2")
+										   .numVotes(0)
+										   .averageRating(0f)
+										   .build();
+
 		TvShowRating rating3 = TvShowRating.builder()
 										   .tvShowId("3")
 										   .numVotes(64)
@@ -156,14 +179,15 @@ class TvShowServiceTest {
 
 		when(tvShowRepository.findAllById(idsToFind)).thenReturn(Flux.just(tvShow1, tvShow2, tvShow3));
 
-		when(tvShowRatingClient.findTvshowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating3));
+		when(tvShowRatingClient.findTvshowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating2, rating3));
 
 		Flux<TvShow> result = cut.findByIds(idsToFind);
 
 		StepVerifier.create(result)
 					.expectNext(tvShow1.withNumVotes(rating1.getNumVotes())
 									   .withAverageRating(rating1.getAverageRating()))
-					.expectNext(tvShow2)
+					.expectNext(tvShow2.withNumVotes(rating2.getNumVotes())
+									   .withAverageRating(rating2.getAverageRating()))
 					.expectNext(tvShow3.withNumVotes(rating3.getNumVotes())
 									   .withAverageRating(rating3.getAverageRating()))
 					.verifyComplete();
@@ -175,7 +199,6 @@ class TvShowServiceTest {
 	@Test
 	@DisplayName("When saving all Tv Show, then return all tv show saved")
 	void saveAll() {
-		List<String> idsToFind = asList("1", "2", "3");
 		TvShow tvShow1 = TvShow.builder()
 							   .id("1")
 							   .title("az")

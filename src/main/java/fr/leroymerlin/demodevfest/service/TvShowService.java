@@ -28,32 +28,13 @@ public class TvShowService {
 		return tvShowRepository.findById(id)
 							   .flatMap(tvShow -> tvShowRatingClient.findTvshowRatingById(id)
 																	.map(tvShowRating -> addRatingInformation(tvShow, tvShowRating))
-																	.switchIfEmpty(Mono.just(tvShow)));
-	}
-
-	public Mono<TvShow> findByIdParallel(String id) {
-		return Mono.zip(tvShowRepository.findById(id), tvShowRatingClient.findTvshowRatingById(id)
-																		 .defaultIfEmpty(TvShowRating.NO_TV_SHOW_RATING))
-				   .map(tvShowAndRating -> addRatingInformation(tvShowAndRating.getT1(), tvShowAndRating.getT2()));
+																	.defaultIfEmpty(tvShow));
 	}
 
 	public Flux<TvShow> findAll() {
 		return tvShowRepository.findAll()
 							   .buffer(100)
 							   .flatMap(this::fetchRating);
-	}
-
-	private Flux<TvShow> fetchRating(List<TvShow> tvShows) {
-		return tvShowRatingClient.findTvshowRatingByIds(extractIdsFromTvShows(tvShows))
-								 .groupBy(TvShowRating::getTvShowId)
-								 .flatMap(ratingByTvShow -> addTvShowRating(tvShows, ratingByTvShow));
-	}
-
-	private Flux<TvShow> addTvShowRating(List<TvShow> tvShows, GroupedFlux<String, TvShowRating> ratingByTvShow) {
-		Map<String, TvShow> tvShowById = tvShows.stream()
-												.collect(Collectors.toMap(TvShow::getId, tvShow -> tvShow));
-
-		return ratingByTvShow.map(tvShowRating -> addRatingInformation(tvShowById.get(ratingByTvShow.key()), tvShowRating));
 	}
 
 	public Flux<TvShow> saveAll() {
@@ -69,12 +50,27 @@ public class TvShowService {
 				   .flatMapMany(this::fetchRating);
 	}
 
+	private Flux<TvShow> fetchRating(List<TvShow> tvShows) {
+		return tvShowRatingClient.findTvshowRatingByIds(extractIdsFromTvShows(tvShows))
+								 .groupBy(TvShowRating::getTvShowId)
+								 .flatMap(ratingByTvShow -> addTvShowRating(tvShows, ratingByTvShow));
+	}
+
 	private TvShow addRatingInformation(TvShow tvShow, TvShowRating tvShowRating) {
 		if (tvShowRating != null) {
 			return tvShow.setAverageRating(tvShowRating.getAverageRating())
 						 .setNumVotes(tvShowRating.getNumVotes());
 		}
 		return tvShow;
+	}
+
+	private Flux<TvShow> addTvShowRating(List<TvShow> tvShows, GroupedFlux<String, TvShowRating> ratingByTvShow) {
+		Map<String, TvShow> tvShowById = tvShows.stream()
+												.collect(Collectors.toMap(TvShow::getId, tvShow -> tvShow));
+
+
+
+		return ratingByTvShow.map(tvShowRating -> addRatingInformation(tvShowById.get(ratingByTvShow.key()), tvShowRating));
 	}
 
 	private TvShowIds extractIdsFromTvShows(List<TvShow> tvShows) {
@@ -84,5 +80,11 @@ public class TvShowService {
 									.collect(Collectors.toList()))
 						.build();
 
+	}
+
+	public Mono<TvShow> findByIdParallel(String id) {
+		return Mono.zip(tvShowRepository.findById(id), tvShowRatingClient.findTvshowRatingById(id)
+																		 .defaultIfEmpty(TvShowRating.NO_TV_SHOW_RATING))
+				   .map(tvShowAndRating -> addRatingInformation(tvShowAndRating.getT1(), tvShowAndRating.getT2()));
 	}
 }
