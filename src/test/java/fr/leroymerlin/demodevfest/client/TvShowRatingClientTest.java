@@ -2,7 +2,6 @@ package fr.leroymerlin.demodevfest.client;
 
 import com.google.common.net.MediaType;
 import fr.leroymerlin.demodevfest.IntegrationTestConfiguration;
-import fr.leroymerlin.demodevfest.model.TvShowIds;
 import fr.leroymerlin.demodevfest.model.TvShowRating;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,9 +46,7 @@ class TvShowRatingClientTest extends AbstractClientIntegrationTest {
 								Parameter.param("ids", "1")))
 				  .respond(response().withStatusCode(HttpStatus.OK.value())
 									 .withBody(response, MediaType.JSON_UTF_8));
-		Flux<TvShowRating> result = cut.findTVShowRatingByIds(TvShowIds.builder()
-																	   .ids(asList("1"))
-																	   .build());
+		Flux<TvShowRating> result = cut.findTVShowRatingByIds(asList("1"));
 
 		StepVerifier.create(result)
 					.expectNextMatches(tvShowRating -> tvShowRating.getNumVotes()
@@ -77,9 +74,7 @@ class TvShowRatingClientTest extends AbstractClientIntegrationTest {
 								Parameter.param("ids", "2")))
 				  .respond(response().withStatusCode(HttpStatus.OK.value())
 									 .withBody(response, MediaType.JSON_UTF_8));
-		Flux<TvShowRating> result = cut.findTVShowRatingByIds(TvShowIds.builder()
-																	   .ids(asList("2"))
-																	   .build());
+		Flux<TvShowRating> result = cut.findTVShowRatingByIds(asList("2"));
 
 		StepVerifier.create(result)
 					.expectNextMatches(tvShowRating -> tvShowRating.getNumVotes()
@@ -99,9 +94,7 @@ class TvShowRatingClientTest extends AbstractClientIntegrationTest {
 							.withQueryStringParameters(
 								Parameter.param("ids", "3")), Times.exactly(4))
 				  .respond(response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-		Flux<TvShowRating> result = cut.findTVShowRatingByIds(TvShowIds.builder()
-																	   .ids(asList("3"))
-																	   .build());
+		Flux<TvShowRating> result = cut.findTVShowRatingByIds(asList("3"));
 
 		StepVerifier.create(result)
 					.expectError()

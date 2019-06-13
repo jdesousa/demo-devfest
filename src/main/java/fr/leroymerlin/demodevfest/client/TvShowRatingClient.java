@@ -13,11 +13,12 @@ import reactor.core.publisher.Mono;
 import reactor.retry.Retry;
 
 import java.time.Duration;
+import java.util.List;
 
 @Service
 @Slf4j
 public class TvShowRatingClient {
-	private static String RATINGS_PATH = "/tvShowRatingByIds?ids={ids}";
+	private static String RATINGS_PATH = "/tvShowRatingByIds";
 	private static String RATING_PATH = "/tvShowRating/{id}";
 
 	private WebClient webClient;
@@ -33,9 +34,11 @@ public class TvShowRatingClient {
 		this.webClient = webClient;
 	}
 
-	public Flux<TvShowRating> findTVShowRatingByIds(TvShowIds tvShowIds) {
+	public Flux<TvShowRating> findTVShowRatingByIds(List<String> tvShowIds) {
 		return webClient.get()
-						.uri(RATINGS_PATH, String.join(",", tvShowIds.getIds()))
+						.uri(builder -> builder.path(RATINGS_PATH)
+											   .queryParam("ids", tvShowIds.toArray())
+											   .build())
 						.accept(MediaType.APPLICATION_JSON_UTF8)
 						.retrieve()
 						.bodyToFlux(TvShowRating.class)

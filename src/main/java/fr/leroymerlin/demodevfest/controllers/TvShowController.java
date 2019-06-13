@@ -24,14 +24,10 @@ public class TvShowController {
 
 	private TvShowService tvShowService;
 
-	@GetMapping("ping")
-	public String ping() {
-		return "pong";
-	}
+	@GetMapping(value = "/tvShows/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public Mono<TvShow> getTvShowById(@PathVariable String id) {
 
-	@PutMapping(value = "/tvShow", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-	public Flux<TvShow> saveAll() {
-		return tvShowService.saveAll();
+		return tvShowService.findById(id);
 	}
 
 	@GetMapping(value = "/tvShows", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
@@ -52,16 +48,8 @@ public class TvShowController {
 		}
 	}
 
-	@GetMapping(value = "/tvShows/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public Mono<TvShow> getTvShowById(@PathVariable String id) {
-		return tvShowService.findById(id)
-							.doOnNext(tvShow -> log.info("get {}", tvShow))
-							.doOnError(throwable -> log.error("Error"))
-							.doOnTerminate(() -> log.info("Terminate maybe with errors"))
-							.doOnSuccess(tvShow -> log.info("Terminate without errors"))
-							.doOnCancel(() -> log.info("Cancelled."))
-							.doOnSubscribe(subscription -> log.info("Subscription"));
-
+	@PutMapping(value = "/tvShow", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+	public Flux<TvShow> saveAll() {
+		return tvShowService.saveAll();
 	}
-
 }

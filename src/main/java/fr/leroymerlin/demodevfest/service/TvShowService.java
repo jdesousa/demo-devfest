@@ -2,7 +2,6 @@ package fr.leroymerlin.demodevfest.service;
 
 import fr.leroymerlin.demodevfest.client.TvShowRatingClient;
 import fr.leroymerlin.demodevfest.model.TvShow;
-import fr.leroymerlin.demodevfest.model.TvShowIds;
 import fr.leroymerlin.demodevfest.model.TvShowRating;
 import fr.leroymerlin.demodevfest.repository.TvShowRepository;
 import lombok.AllArgsConstructor;
@@ -71,12 +70,10 @@ public class TvShowService {
 		return ratingByTvShow.map(tvShowRating -> createTVShowWithRating(tvShowById.get(ratingByTvShow.key()), tvShowRating));
 	}
 
-	private TvShowIds extractIdsFromTvShows(List<TvShow> tvShows) {
-		return TvShowIds.builder()
-						.ids(tvShows.stream()
-									.map(TvShow::getId)
-									.collect(Collectors.toList()))
-						.build();
+	private List<String> extractIdsFromTvShows(List<TvShow> tvShows) {
+		return tvShows.stream()
+					  .map(TvShow::getId)
+					  .collect(Collectors.toList());
 
 	}
 

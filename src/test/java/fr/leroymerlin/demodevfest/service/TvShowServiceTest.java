@@ -73,9 +73,7 @@ class TvShowServiceTest {
 										   .averageRating(1.5f)
 										   .build();
 
-		TvShowIds ratingParams = TvShowIds.builder()
-										  .ids(asList("1", "2", "3"))
-										  .build();
+		List<String> ratingParams = asList("1", "2", "3");
 
 		when(tvShowRepository.findAll()).thenReturn(Flux.just(tvShow1, tvShow2, tvShow3));
 
@@ -173,13 +171,10 @@ class TvShowServiceTest {
 										   .averageRating(1.5f)
 										   .build();
 
-		TvShowIds ratingParams = TvShowIds.builder()
-										  .ids(idsToFind)
-										  .build();
 
 		when(tvShowRepository.findAllById(idsToFind)).thenReturn(Flux.just(tvShow1, tvShow2, tvShow3));
 
-		when(tvShowRatingClient.findTVShowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating2, rating3));
+		when(tvShowRatingClient.findTVShowRatingByIds(idsToFind)).thenReturn(Flux.just(rating1, rating2, rating3));
 
 		Flux<TvShow> result = cut.findByIds(idsToFind);
 
@@ -193,7 +188,7 @@ class TvShowServiceTest {
 					.verifyComplete();
 
 		verify(tvShowRepository).findAllById(idsToFind);
-		verify(tvShowRatingClient).findTVShowRatingByIds(ratingParams);
+		verify(tvShowRatingClient).findTVShowRatingByIds(idsToFind);
 	}
 
 	@Test
