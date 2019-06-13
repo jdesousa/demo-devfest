@@ -79,7 +79,7 @@ class TvShowServiceTest {
 
 		when(tvShowRepository.findAll()).thenReturn(Flux.just(tvShow1, tvShow2, tvShow3));
 
-		when(tvShowRatingClient.findTvshowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating2, rating3));
+		when(tvShowRatingClient.findTVShowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating2, rating3));
 
 		Flux<TvShow> result = cut.findAll();
 
@@ -93,7 +93,7 @@ class TvShowServiceTest {
 					.verifyComplete();
 
 		verify(tvShowRepository).findAll();
-		verify(tvShowRatingClient).findTvshowRatingByIds(ratingParams);
+		verify(tvShowRatingClient).findTVShowRatingByIds(ratingParams);
 	}
 
 	@Test
@@ -125,7 +125,7 @@ class TvShowServiceTest {
 
 		when(tvShowRepository.findById(idToFind)).thenReturn(Mono.just(tvShow1));
 
-		when(tvShowRatingClient.findTvshowRatingById(tvShow1.getId())).thenReturn(Mono.just(rating1));
+		when(tvShowRatingClient.findTVShowRatingById(tvShow1.getId())).thenReturn(Mono.just(rating1));
 
 		Mono<TvShow> result = cut.findById(idToFind);
 
@@ -135,7 +135,7 @@ class TvShowServiceTest {
 					.verifyComplete();
 
 		verify(tvShowRepository).findById(idToFind);
-		verify(tvShowRatingClient).findTvshowRatingById(tvShow1.getId());
+		verify(tvShowRatingClient).findTVShowRatingById(tvShow1.getId());
 	}
 
 	@Test
@@ -179,7 +179,7 @@ class TvShowServiceTest {
 
 		when(tvShowRepository.findAllById(idsToFind)).thenReturn(Flux.just(tvShow1, tvShow2, tvShow3));
 
-		when(tvShowRatingClient.findTvshowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating2, rating3));
+		when(tvShowRatingClient.findTVShowRatingByIds(ratingParams)).thenReturn(Flux.just(rating1, rating2, rating3));
 
 		Flux<TvShow> result = cut.findByIds(idsToFind);
 
@@ -193,7 +193,7 @@ class TvShowServiceTest {
 					.verifyComplete();
 
 		verify(tvShowRepository).findAllById(idsToFind);
-		verify(tvShowRatingClient).findTvshowRatingByIds(ratingParams);
+		verify(tvShowRatingClient).findTVShowRatingByIds(ratingParams);
 	}
 
 	@Test

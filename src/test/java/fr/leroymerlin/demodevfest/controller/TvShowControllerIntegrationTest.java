@@ -11,7 +11,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(classes = IntegrationTestConfiguration.class)
 @ActiveProfiles("integration")
-//@PropertySource("classpath:application-test.yaml")
 @AutoConfigureWebTestClient
 class TvShowControllerIntegrationTest  {
 

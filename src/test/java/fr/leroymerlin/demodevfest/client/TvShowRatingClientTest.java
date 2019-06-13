@@ -47,7 +47,7 @@ class TvShowRatingClientTest extends AbstractClientIntegrationTest {
 								Parameter.param("ids", "1")))
 				  .respond(response().withStatusCode(HttpStatus.OK.value())
 									 .withBody(response, MediaType.JSON_UTF_8));
-		Flux<TvShowRating> result = cut.findTvshowRatingByIds(TvShowIds.builder()
+		Flux<TvShowRating> result = cut.findTVShowRatingByIds(TvShowIds.builder()
 																	   .ids(asList("1"))
 																	   .build());
 
@@ -77,7 +77,7 @@ class TvShowRatingClientTest extends AbstractClientIntegrationTest {
 								Parameter.param("ids", "2")))
 				  .respond(response().withStatusCode(HttpStatus.OK.value())
 									 .withBody(response, MediaType.JSON_UTF_8));
-		Flux<TvShowRating> result = cut.findTvshowRatingByIds(TvShowIds.builder()
+		Flux<TvShowRating> result = cut.findTVShowRatingByIds(TvShowIds.builder()
 																	   .ids(asList("2"))
 																	   .build());
 
@@ -99,7 +99,7 @@ class TvShowRatingClientTest extends AbstractClientIntegrationTest {
 							.withQueryStringParameters(
 								Parameter.param("ids", "3")), Times.exactly(4))
 				  .respond(response().withStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value()));
-		Flux<TvShowRating> result = cut.findTvshowRatingByIds(TvShowIds.builder()
+		Flux<TvShowRating> result = cut.findTVShowRatingByIds(TvShowIds.builder()
 																	   .ids(asList("3"))
 																	   .build());
 

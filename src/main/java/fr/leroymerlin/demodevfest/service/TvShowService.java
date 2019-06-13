@@ -26,8 +26,8 @@ public class TvShowService {
 
 	public Mono<TvShow> findById(String id) {
 		return tvShowRepository.findById(id)
-							   .flatMap(tvShow -> tvShowRatingClient.findTvshowRatingById(id)
-																	.map(tvShowRating -> addRatingInformation(tvShow, tvShowRating))
+							   .flatMap(tvShow -> tvShowRatingClient.findTVShowRatingById(id)
+																	.map(tvShowRating -> createTVShowWithRating(tvShow, tvShowRating))
 																	.defaultIfEmpty(tvShow));
 	}
 
@@ -37,12 +37,6 @@ public class TvShowService {
 							   .flatMap(this::fetchRating);
 	}
 
-	public Flux<TvShow> saveAll() {
-		return csvFileReader.readTvShow()
-							.buffer(100)
-							.flatMapSequential(tvShows -> tvShowRepository.saveAll(tvShows), 5, 100);
-	}
-
 	public Flux<TvShow> findByIds(List<String> ids) {
 		return tvShowRepository
 				   .findAllById(ids)
@@ -50,13 +44,19 @@ public class TvShowService {
 				   .flatMapMany(this::fetchRating);
 	}
 
+	public Flux<TvShow> saveAll() {
+		return csvFileReader.readTvShow()
+							.buffer(100)
+							.flatMapSequential(tvShows -> tvShowRepository.saveAll(tvShows), 5, 100);
+	}
+
 	private Flux<TvShow> fetchRating(List<TvShow> tvShows) {
-		return tvShowRatingClient.findTvshowRatingByIds(extractIdsFromTvShows(tvShows))
+		return tvShowRatingClient.findTVShowRatingByIds(extractIdsFromTvShows(tvShows))
 								 .groupBy(TvShowRating::getTvShowId)
 								 .flatMap(ratingByTvShow -> addTvShowRating(tvShows, ratingByTvShow));
 	}
 
-	private TvShow addRatingInformation(TvShow tvShow, TvShowRating tvShowRating) {
+	private TvShow createTVShowWithRating(TvShow tvShow, TvShowRating tvShowRating) {
 		if (tvShowRating != null) {
 			return tvShow.setAverageRating(tvShowRating.getAverageRating())
 						 .setNumVotes(tvShowRating.getNumVotes());
@@ -68,9 +68,7 @@ public class TvShowService {
 		Map<String, TvShow> tvShowById = tvShows.stream()
 												.collect(Collectors.toMap(TvShow::getId, tvShow -> tvShow));
 
-
-
-		return ratingByTvShow.map(tvShowRating -> addRatingInformation(tvShowById.get(ratingByTvShow.key()), tvShowRating));
+		return ratingByTvShow.map(tvShowRating -> createTVShowWithRating(tvShowById.get(ratingByTvShow.key()), tvShowRating));
 	}
 
 	private TvShowIds extractIdsFromTvShows(List<TvShow> tvShows) {
@@ -83,8 +81,8 @@ public class TvShowService {
 	}
 
 	public Mono<TvShow> findByIdParallel(String id) {
-		return Mono.zip(tvShowRepository.findById(id), tvShowRatingClient.findTvshowRatingById(id)
+		return Mono.zip(tvShowRepository.findById(id), tvShowRatingClient.findTVShowRatingById(id)
 																		 .defaultIfEmpty(TvShowRating.NO_TV_SHOW_RATING))
-				   .map(tvShowAndRating -> addRatingInformation(tvShowAndRating.getT1(), tvShowAndRating.getT2()));
+				   .map(tvShowAndRating -> createTVShowWithRating(tvShowAndRating.getT1(), tvShowAndRating.getT2()));
 	}
 }
